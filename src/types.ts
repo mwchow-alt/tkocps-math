@@ -2,12 +2,23 @@ export type GradeLevel = 'grade1' | 'grade2' | 'grade3' | 'grade4' | 'custom';
 
 export type MathOperator = '+' | '-' | '×' | '÷';
 
+export type UserRole = 'student' | 'teacher';
+
 export interface StudentProfile {
   studentId: string;
   studentName: string;
   avatar: string;
   gradeLevel: GradeLevel;
+  role?: 'student';
 }
+
+export interface TeacherProfile {
+  teacherId: string;
+  teacherName: string;
+  role: 'teacher';
+  lastLogin: string;
+}
+
 
 export interface MathQuestion {
   id: number;
