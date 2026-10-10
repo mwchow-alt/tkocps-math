@@ -1,0 +1,7 @@
+{
+  "name": "小學數學大冒險 - Google Sheet 連動練習軟體",
+  "description": "專為國小學童設計的趣味數學練習軟體，具備自動出題、即時回饋、成績結算與 Google Sheets (GAS) 雲端紀錄自動串接功能。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
+
