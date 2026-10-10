@@ -1,30 +1,1430 @@
 <!doctype html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>小學數學大冒險 - Google Sheet 連動練習軟體</title>
-    <meta name="description" content="專為國小學童設計的趣味數學練習軟體，具備自動出題、即時回饋、成績結算與 Google Sheets (GAS) 雲端紀錄自動串接功能。" />
-    <meta property="og:title" content="小學數學大冒險 - Google Sheet 連動練習軟體" />
-    <meta property="og:description" content="專為國小學童設計的趣味數學練習軟體，具備自動出題、即時回饋、成績結算與 Google Sheets (GAS) 雲端紀錄自動串接功能。" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-amber-50/40 text-slate-800 antialiased selection:bg-amber-200">
-    <div id="root">
-      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; text-align: center; background-color: #fffbeb; color: #78350f;">
-        <div style="font-size: 56px; margin-bottom: 16px;">🎒</div>
-        <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 8px; color: #92400e;">小學數學大冒險載入中...</h2>
-        <p style="font-size: 14px; color: #b45309; max-width: 460px; line-height: 1.6;">
-          若頁面持續停留在此處，請確認 GitHub 倉庫設定：<br />
-          <strong>Settings ➔ Pages ➔ Build and deployment ➔ Source</strong> 請選擇 <strong>「GitHub Actions」</strong>。
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小學數學大冒險 - Google Sheet 連動練習軟體</title>
+  <meta name="description" content="專為國小學童設計的趣味數學練習軟體，具備自動出題、即時回饋、成績結算與 Google Sheets (GAS) 雲端紀錄自動串接功能。" />
+  <meta property="og:title" content="小學數學大冒險 - Google Sheet 連動練習軟體" />
+  <meta property="og:description" content="專為國小學童設計的趣味數學練習軟體，具備自動出題、即時回饋、成績結算與 Google Sheets (GAS) 雲端紀錄自動串接功能。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --primary-dark: #b45309;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg-cream: #fffdf5;
+      --card-bg: #ffffff;
+      --border-color: #fde68a;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Plus Jakarta Sans", "Zen Maru Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fef9c3 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Bar */
+    header {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid #fde68a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      font-size: 26px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #78350f;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-icon:hover {
+      background: #fde68a;
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 580px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 4px solid var(--border-color);
+      box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Screen visibility */
+    .screen {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Banner in Login */
+    .hero-banner {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fde047 100%);
+      padding: 28px 24px;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .hero-text h1 {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: #78350f;
+      margin-bottom: 4px;
+    }
+
+    .hero-text p {
+      font-size: 0.85rem;
+      color: #92400e;
+      font-weight: 600;
+    }
+
+    .hero-avatar-box {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border: 3px solid #fef3c7;
+      transform: rotate(3deg);
+    }
+
+    .form-body {
+      padding: 26px 22px;
+    }
+
+    .section-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #78350f;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-opt {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 26px;
+      padding: 8px 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .avatar-opt.selected {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      transform: scale(1.08);
+      box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 13px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .grade-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .grade-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      background: #ffffff;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .grade-card.selected {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+    }
+
+    .grade-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    .grade-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 16px rgba(245, 158, 11, 0.35);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(245, 158, 11, 0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    /* Loading Screen */
+    .loading-wrap {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 54px;
+      height: 54px;
+      border: 6px solid #fde68a;
+      border-top-color: #f59e0b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Practice Screen */
+    .practice-top {
+      padding: 16px 20px;
+      background: #fefce8;
+      border-bottom: 2px dashed #fde047;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .student-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #92400e;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #f1f5f9;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #f59e0b;
+      width: 10%;
+      transition: width 0.3s ease;
+    }
+
+    .question-card {
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .formula-display {
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: #78350f;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .hint-btn {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 16px;
+    }
+
+    .hint-box {
+      background: #fffbeb;
+      border: 1.5px dashed #fcd34d;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #92400e;
+      text-align: left;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .answer-input-box {
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto 16px;
+    }
+
+    .answer-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 2.2rem;
+      font-weight: 900;
+      text-align: center;
+      border: 3px solid #cbd5e1;
+      border-radius: 16px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .answer-input:focus {
+      border-color: #f59e0b;
+    }
+
+    /* Keypad */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 280px;
+      margin: 0 auto 20px;
+    }
+
+    .key-btn {
+      padding: 12px 0;
+      font-size: 1.3rem;
+      font-weight: 800;
+      background: #f1f5f9;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #1e293b;
+      transition: all 0.1s ease;
+    }
+
+    .key-btn:hover {
+      background: #fef3c7;
+      border-color: #fcd34d;
+    }
+
+    .key-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Feedback message */
+    .feedback-banner {
+      display: none;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+      text-align: center;
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .feedback-banner.correct {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+      border: 2px solid #86efac;
+    }
+
+    .feedback-banner.wrong {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #fca5a5;
+    }
+
+    /* Result Screen */
+    .result-body {
+      padding: 36px 24px;
+      text-align: center;
+    }
+
+    .result-badge-icon {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+
+    .result-score {
+      font-size: 4.8rem;
+      font-weight: 900;
+      color: #d97706;
+      line-height: 1;
+      margin: 14px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result-stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stat-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+    }
+
+    .stat-pill-num {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #1e293b;
+      margin-top: 4px;
+    }
+
+    .sync-status-box {
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #065f46;
+      font-weight: 700;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Modal dialogs */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 4px solid #fde68a;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      background: #fbbf24;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #78350f;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #78350f;
+      font-weight: bold;
+    }
+
+    .modal-content {
+      padding: 22px;
+      font-size: 0.88rem;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      overflow-x: auto;
+      margin: 10px 0;
+      font-family: monospace;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 16px;
+      font-size: 0.8rem;
+      color: #92400e;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="brand-wrap">
+      <span class="brand-logo">🎒</span>
+      <span class="brand-title">小學數學大冒險</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openModal('gasModal')">
+        <span>☁️ 試算表設定</span>
+      </button>
+      <button class="btn-icon" onclick="openModal('historyModal')">
+        <span>📜 紀錄日誌</span>
+      </button>
+      <button class="btn-icon" id="soundToggleBtn" onclick="toggleSound()">
+        <span>🔊 音效開</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Area -->
+  <main>
+    <div class="card">
+      
+      <!-- SCREEN 1: 登入介面 (Phase 2) -->
+      <div id="screenLogin" class="screen active">
+        <div class="hero-banner">
+          <div class="hero-text">
+            <h1>歡迎參加數學練習！</h1>
+            <p>每次 10 題趣味挑戰 · 成績自動同步 Google Sheet</p>
+          </div>
+          <div class="hero-avatar-box" id="avatarPreview">🦉</div>
+        </div>
+
+        <div class="form-body">
+          <label class="section-label">選擇你的代表角色：</label>
+          <div class="avatar-grid" id="avatarGrid">
+            <button type="button" class="avatar-opt selected" onclick="selectAvatar('🦉')">🦉</button>
+            <button type="button" class="avatar-opt" onclick="selectAvatar('🦊')">🦊</button>
+            <button type="button" class="avatar-opt" onclick="selectAvatar('🐰')">🐰</button>
+            <button type="button" class="avatar-opt" onclick="selectAvatar('🦁')">🦁</button>
+            <button type="button" class="avatar-opt" onclick="selectAvatar('🐼')">🐼</button>
+            <button type="button" class="avatar-opt" onclick="selectAvatar('🚀')">🚀</button>
+          </div>
+
+          <div class="input-row">
+            <div>
+              <label class="section-label" for="studentId">學生學號：</label>
+              <input type="text" id="studentId" class="input-field" placeholder="例如：S101" value="S101" />
+            </div>
+            <div>
+              <label class="section-label" for="studentName">學生姓名：</label>
+              <input type="text" id="studentName" class="input-field" placeholder="例如：王小明" value="王小明" />
+            </div>
+          </div>
+
+          <label class="section-label">選擇練習年級 / 題目範圍：</label>
+          <div class="grade-grid">
+            <div class="grade-card selected" id="gradeCard_2" onclick="selectGrade(2)">
+              <div class="grade-title">小二：兩位數加減法</div>
+              <div class="grade-desc">核心挑戰：35+48、82-37</div>
+            </div>
+            <div class="grade-card" id="gradeCard_1" onclick="selectGrade(1)">
+              <div class="grade-title">小一：20 以內加減</div>
+              <div class="grade-desc">基礎入門：8+7、15-6</div>
+            </div>
+            <div class="grade-card" id="gradeCard_3" onclick="selectGrade(3)">
+              <div class="grade-title">小三：九九乘法表</div>
+              <div class="grade-desc">進階加乘：7×8、6×9</div>
+            </div>
+            <div class="grade-card" id="gradeCard_4" onclick="selectGrade(4)">
+              <div class="grade-title">小四：除法與綜合</div>
+              <div class="grade-desc">四則運算：72÷8、百位數</div>
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="handleStartPractice()">
+            <span>🚀 開始練習</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: 載入過場 (Phase 2 要求：顯示『載入題目中...』) -->
+      <div id="screenLoading" class="screen">
+        <div class="loading-wrap">
+          <div class="spinner"></div>
+          <h2 style="font-size: 1.5rem; color: #78350f; font-weight: 900; margin-bottom: 8px;">載入題目中...</h2>
+          <p style="font-size: 0.9rem; color: #92400e; font-weight: 600;">正在登入學號，並建立 Google Sheet 連線紀錄...</p>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: 數學練習核心區 (Phase 3) -->
+      <div id="screenPractice" class="screen">
+        <div class="practice-top">
+          <div class="student-badge">
+            <span id="dispAvatar">🦉</span>
+            <span id="dispStudentName">王小明 同學</span>
+          </div>
+          <div style="font-size: 0.95rem; font-weight: 900; color: #d97706;" id="dispProgressText">
+            第 1 / 10 題
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <div class="question-card">
+          <div class="formula-display" id="dispFormula">36 + 28 = ?</div>
+
+          <button type="button" class="hint-btn" onclick="toggleHint()">
+            <span>💡 看解題提示</span>
+          </button>
+          <div class="hint-box" id="hintBox"></div>
+
+          <div id="feedbackBanner" class="feedback-banner"></div>
+
+          <div class="answer-input-box">
+            <input type="number" id="answerInput" class="answer-input" placeholder="答案" autocomplete="off" />
+          </div>
+
+          <!-- Virtual Keypad -->
+          <div class="keypad" id="virtualKeypad">
+            <button type="button" class="key-btn" onclick="pressKey('1')">1</button>
+            <button type="button" class="key-btn" onclick="pressKey('2')">2</button>
+            <button type="button" class="key-btn" onclick="pressKey('3')">3</button>
+            <button type="button" class="key-btn" onclick="pressKey('4')">4</button>
+            <button type="button" class="key-btn" onclick="pressKey('5')">5</button>
+            <button type="button" class="key-btn" onclick="pressKey('6')">6</button>
+            <button type="button" class="key-btn" onclick="pressKey('7')">7</button>
+            <button type="button" class="key-btn" onclick="pressKey('8')">8</button>
+            <button type="button" class="key-btn" onclick="pressKey('9')">9</button>
+            <button type="button" class="key-btn" onclick="pressKey('C')">清空</button>
+            <button type="button" class="key-btn" onclick="pressKey('0')">0</button>
+            <button type="button" class="key-btn" onclick="pressKey('DEL')">⌫</button>
+          </div>
+
+          <button id="btnSubmitAnswer" class="btn-primary" onclick="submitAnswer()">
+            <span>送出答案</span>
+          </button>
+          <button id="btnNextQuestion" class="btn-primary" style="display: none; background: #059669;" onclick="nextQuestion()">
+            <span>下一題 ➡️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 4: 成績結算區 (Phase 3) -->
+      <div id="screenResult" class="screen">
+        <div class="result-body">
+          <div class="result-badge-icon" id="resultMedal">🌟</div>
+          <h2 style="font-size: 1.6rem; font-weight: 900; color: #78350f;" id="resultTitle">太棒了，完成練習！</h2>
+          <p style="font-size: 0.9rem; color: #92400e; margin-top: 4px;" id="resultSubtitle">完成 10 題數學測驗</p>
+
+          <div class="result-score">
+            <span id="finalScoreDisplay">100</span>
+            <span style="font-size: 1.8rem; color: #b45309;">分</span>
+          </div>
+
+          <div class="result-stats-row">
+            <div class="stat-pill">
+              <div>答對題數</div>
+              <div class="stat-pill-num" id="statCorrectText">10 / 10 題</div>
+            </div>
+            <div class="stat-pill">
+              <div>總共耗時</div>
+              <div class="stat-pill-num" id="statTimeText">45 秒</div>
+            </div>
+          </div>
+
+          <div class="sync-status-box" id="syncStatusBox">
+            <span>✅ 成績已同步上傳至 Google Sheet 試算表！</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button class="btn-primary" onclick="restartSamePractice()">
+              <span>🔄 再練習一次</span>
+            </button>
+            <button class="btn-icon" style="justify-content: center; padding: 14px; font-size: 1rem;" onclick="backToLogin()">
+              <span>👤 更換學生</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    小學數學大冒險 · Google Sheet (GAS) 雲端紀錄自動串接
+  </footer>
+
+  <!-- MODAL: Google Apps Script 設定 (Phase 1) -->
+  <div id="gasModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>☁️ Google Apps Script (GAS) 後端設定</h3>
+        <button class="modal-close" onclick="closeModal('gasModal')">&times;</button>
+      </div>
+      <div class="modal-content">
+        <p style="margin-bottom: 12px; font-weight: 700; color: #92400e;">
+          步驟說明：將您的 Google Sheet 試算表變成免費的學生資料庫！
         </p>
+        <ol style="padding-left: 20px; margin-bottom: 16px; font-size: 0.85rem;">
+          <li>建立新的 Google 試算表，工作表名稱改為「<strong>紀錄</strong>」。</li>
+          <li>點選【擴充功能】➔【Apps Script】，清空後貼上以下程式碼：</li>
+        </ol>
+
+        <button class="btn-icon" style="margin-bottom: 8px;" onclick="copyGasScript()">📋 一鍵複製 GAS 程式碼</button>
+        <pre id="gasCodeBlock">function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("紀錄") || ss.insertSheet("紀錄");
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["時間戳記", "學號", "姓名", "動作", "得分", "備註"]);
+    }
+    var data = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      data.timestamp || new Date().toLocaleString(),
+      data.studentId || "",
+      data.studentName || "",
+      data.action || "",
+      data.score !== undefined ? data.score : "",
+      data.note || ""
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({status:"success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:"error",message:err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}</pre>
+
+        <ol start="3" style="padding-left: 20px; margin-bottom: 16px; font-size: 0.85rem;">
+          <li>點選【部署】➔【新部署】➔ 選擇「網頁應用程式 (Web app)」。</li>
+          <li><strong>關鍵：</strong>「誰可以存取」選擇「<strong>任何人 (Anyone)</strong>」！</li>
+          <li>將取得的「網頁應用程式網址」貼在下方：</li>
+        </ol>
+
+        <label style="font-weight: 800; font-size: 0.85rem;">貼上您的 Google Apps Script Web App 網址：</label>
+        <input type="url" id="gasApiUrlInput" class="input-field" style="margin-top: 6px; margin-bottom: 12px;" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" style="flex: 1;" onclick="saveGasUrl()">💾 儲存網址</button>
+          <button class="btn-icon" onclick="testGasUrl()">🧪 測試連線</button>
+        </div>
       </div>
     </div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  </div>
 
+  <!-- MODAL: 發送紀錄日誌 -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>📜 學生練習與發送日誌</h3>
+        <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+      </div>
+      <div class="modal-content">
+        <div id="historyList" style="max-height: 350px; overflow-y: auto; margin-bottom: 16px;">
+          <p style="color: #64748b; text-align: center;">尚無練習紀錄</p>
+        </div>
+        <button class="btn-icon" style="color: #ef4444;" onclick="clearHistoryLogs()">🗑️ 清空歷史紀錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vanilla JavaScript Logic (All Phases Self-Contained) -->
+  <script>
+    // ==========================================
+    // 1. Web Audio API 音效生成器 (無須外部音效檔案)
+    // ==========================================
+    var audioCtx = null;
+    var soundEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+        var AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        var ctx = getAudioContext();
+        if (!ctx) return;
+        var now = ctx.currentTime;
+
+        if (type === 'click') {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.04);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'correct') {
+          // Cheerful chime: C5 -> E5 -> G5 -> C6
+          [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, idx) {
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.2);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.2);
+          });
+        } else if (type === 'wrong') {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.linearRampToValueAtTime(160, now + 0.22);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'fanfare') {
+          [523, 659, 783, 1046, 880, 1046].forEach(function(freq, idx) {
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.25);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.25);
+          });
+        }
+      } catch(e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundToggleBtn').innerText = soundEnabled ? '🔊 音效開' : '🔇 音效關';
+    }
+
+    // ==========================================
+    // 2. Google Apps Script 傳送服務 (Phase 1 & 2 & 3)
+    // ==========================================
+    var GAS_STORAGE_KEY = 'elementary_math_gas_url';
+    var HISTORY_STORAGE_KEY = 'elementary_math_history_logs';
+
+    function getGasUrl() {
+      return localStorage.getItem(GAS_STORAGE_KEY) || '';
+    }
+
+    function setGasUrl(url) {
+      localStorage.setItem(GAS_STORAGE_KEY, url.trim());
+    }
+
+    function addHistory(studentId, studentName, action, score, statusText) {
+      var logs = [];
+      try {
+        logs = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+      } catch(e) {}
+      logs.unshift({
+        time: new Date().toLocaleString('zh-TW'),
+        studentId: studentId,
+        studentName: studentName,
+        action: action,
+        score: score,
+        status: statusText
+      });
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(logs.slice(0, 30)));
+      renderHistoryList();
+    }
+
+    function renderHistoryList() {
+      var listEl = document.getElementById('historyList');
+      var logs = [];
+      try {
+        logs = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+      } catch(e) {}
+      if (!logs.length) {
+        listEl.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">尚無練習紀錄</p>';
+        return;
+      }
+      var html = '';
+      logs.forEach(function(item) {
+        html += '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">';
+        html += '<div><strong>' + item.studentName + '</strong> (' + item.studentId + ') · <span style="color:#d97706; font-weight:bold;">' + item.action + '</span>';
+        if (item.score !== '' && item.score !== undefined) {
+          html += ' · ' + item.score + '分';
+        }
+        html += '<div style="font-size:0.75rem; color:#94a3b8;">' + item.time + '</div></div>';
+        html += '<span style="font-size:0.8rem; font-weight:bold; color:#059669;">' + item.status + '</span>';
+        html += '</div>';
+      });
+      listEl.innerHTML = html;
+    }
+
+    function postToGas(payload) {
+      var url = getGasUrl();
+      if (!url || !url.startsWith('https://script.google.com/macros/s/')) {
+        addHistory(payload.studentId, payload.studentName, payload.action, payload.score, '已本機儲存 (待填網址)');
+        return Promise.resolve({ simulated: true });
+      }
+
+      // 使用 text/plain 避免跨域預檢被封鎖
+      return fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(function() {
+        addHistory(payload.studentId, payload.studentName, payload.action, payload.score, '已送達 Google Sheet');
+        return { success: true };
+      }).catch(function(err) {
+        addHistory(payload.studentId, payload.studentName, payload.action, payload.score, '傳送異常: ' + err.toString());
+        return { error: err };
+      });
+    }
+
+    // ==========================================
+    // 3. 畫面與狀態管理
+    // ==========================================
+    var currentAvatar = '🦉';
+    var currentGrade = 2;
+    var currentStudent = { id: '', name: '' };
+    var currentQuestions = [];
+    var currentQIndex = 0;
+    var correctCount = 0;
+    var startTime = 0;
+    var isSubmitted = false;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(function(el) {
+        el.classList.remove('active');
+      });
+      var target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    function selectAvatar(emoji) {
+      playSound('click');
+      currentAvatar = emoji;
+      document.getElementById('avatarPreview').innerText = emoji;
+      document.querySelectorAll('.avatar-opt').forEach(function(btn) {
+        btn.classList.toggle('selected', btn.innerText === emoji);
+      });
+    }
+
+    function selectGrade(gradeNum) {
+      playSound('click');
+      currentGrade = gradeNum;
+      [1, 2, 3, 4].forEach(function(g) {
+        var el = document.getElementById('gradeCard_' + g);
+        if (el) el.classList.toggle('selected', g === gradeNum);
+      });
+    }
+
+    // ==========================================
+    // 4. 第二階段：學生登入
+    // ==========================================
+    function handleStartPractice() {
+      var sId = document.getElementById('studentId').value.trim();
+      var sName = document.getElementById('studentName').value.trim();
+
+      if (!sId || !sName) {
+        alert('請填寫學生學號與姓名喔！');
+        playSound('wrong');
+        return;
+      }
+
+      playSound('click');
+      currentStudent.id = sId;
+      currentStudent.name = sName;
+
+      // 顯示「載入題目中...」過場畫面
+      showScreen('screenLoading');
+
+      // 呼叫 Google Apps Script API 發送登入紀錄
+      postToGas({
+        studentId: sId,
+        studentName: sName,
+        action: '登入',
+        timestamp: new Date().toLocaleString('zh-TW'),
+        score: '',
+        note: '選擇年級：' + currentGrade
+      });
+
+      // 生成題目並於 1 秒後進入練習
+      currentQuestions = generateMathQuestions(currentGrade, 10);
+      currentQIndex = 0;
+      correctCount = 0;
+      startTime = Date.now();
+
+      setTimeout(function() {
+        startQuizUI();
+      }, 1000);
+    }
+
+    // ==========================================
+    // 5. 第三階段：題目生成邏輯
+    // ==========================================
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateMathQuestions(grade, count) {
+      var list = [];
+      for (var i = 1; i <= count; i++) {
+        var n1 = 0, n2 = 0, op = '+', ans = 0, hint = '';
+        if (grade === 1) {
+          // 小一：20 以內加減
+          if (Math.random() > 0.5) {
+            n1 = rand(3, 11);
+            n2 = rand(2, 20 - n1);
+            op = '+';
+            ans = n1 + n2;
+            hint = '可以從 ' + n1 + ' 開始往上數 ' + n2 + ' 個數喔！';
+          } else {
+            n1 = rand(6, 18);
+            n2 = rand(2, n1 - 1);
+            op = '-';
+            ans = n1 - n2;
+            hint = '從 ' + n1 + ' 往下倒數 ' + n2 + ' 個數！';
+          }
+        } else if (grade === 2) {
+          // 小二：兩位數加減法（如 Prompt 要求）
+          if (Math.random() > 0.45) {
+            n1 = rand(15, 65);
+            n2 = rand(12, 99 - n1);
+            op = '+';
+            ans = n1 + n2;
+            var carry = ((n1 % 10) + (n2 % 10)) >= 10;
+            hint = carry ? '個位數相加滿 10，記得進位 1 到十位數喔！' : '先算個位加個位，再算十位加十位。';
+          } else {
+            n1 = rand(30, 95);
+            n2 = rand(12, n1 - 10);
+            op = '-';
+            ans = n1 - n2;
+            var borrow = (n1 % 10) < (n2 % 10);
+            hint = borrow ? '個位數不夠減，向十位數借 1 當 10 喔！' : '先算個位相減，再算十位相減。';
+          }
+        } else if (grade === 3) {
+          // 小三：九九乘法表
+          op = '×';
+          n1 = rand(2, 9);
+          n2 = rand(2, 9);
+          ans = n1 * n2;
+          hint = '背誦九九乘法表：' + n1 + ' × ' + n2 + ' 是多少呢？';
+        } else {
+          // 小四：除法與綜合
+          op = '÷';
+          n2 = rand(2, 9);
+          ans = rand(2, 12);
+          n1 = n2 * ans;
+          hint = '想一想：' + n2 + ' 乘上多少會是 ' + n1 + ' 呢？';
+        }
+
+        list.push({
+          id: i,
+          n1: n1,
+          n2: n2,
+          op: op,
+          ans: ans,
+          hint: hint,
+          formula: n1 + ' ' + op + ' ' + n2 + ' = ?'
+        });
+      }
+      return list;
+    }
+
+    // ==========================================
+    // 6. 練習區流程控制
+    // ==========================================
+    function startQuizUI() {
+      document.getElementById('dispAvatar').innerText = currentAvatar;
+      document.getElementById('dispStudentName').innerText = currentStudent.name + ' 同學';
+      renderQuestion();
+      showScreen('screenPractice');
+    }
+
+    function renderQuestion() {
+      isSubmitted = false;
+      var q = currentQuestions[currentQIndex];
+
+      document.getElementById('dispProgressText').innerText = '第 ' + (currentQIndex + 1) + ' / ' + currentQuestions.length + ' 題';
+      document.getElementById('progressBarFill').style.width = (((currentQIndex + 1) / currentQuestions.length) * 100) + '%';
+      document.getElementById('dispFormula').innerText = q.formula;
+      document.getElementById('hintBox').innerText = '💡 提示：' + q.hint;
+      document.getElementById('hintBox').style.display = 'none';
+
+      var input = document.getElementById('answerInput');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+
+      var fb = document.getElementById('feedbackBanner');
+      fb.className = 'feedback-banner';
+      fb.style.display = 'none';
+
+      document.getElementById('btnSubmitAnswer').style.display = 'flex';
+      document.getElementById('btnNextQuestion').style.display = 'none';
+      document.getElementById('virtualKeypad').style.pointerEvents = 'auto';
+    }
+
+    function toggleHint() {
+      playSound('click');
+      var hb = document.getElementById('hintBox');
+      hb.style.display = (hb.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function pressKey(k) {
+      if (isSubmitted) return;
+      playSound('click');
+      var input = document.getElementById('answerInput');
+      if (k === 'C') {
+        input.value = '';
+      } else if (k === 'DEL') {
+        input.value = input.value.slice(0, -1);
+      } else {
+        if (input.value.length < 5) input.value += k;
+      }
+    }
+
+    function submitAnswer() {
+      if (isSubmitted) return;
+      var input = document.getElementById('answerInput');
+      var val = input.value.trim();
+      if (val === '') {
+        alert('請先輸入答案再送出喔！');
+        playSound('wrong');
+        return;
+      }
+
+      isSubmitted = true;
+      var userAns = parseInt(val, 10);
+      var q = currentQuestions[currentQIndex];
+      var isCorrect = (userAns === q.ans);
+
+      input.disabled = true;
+      document.getElementById('virtualKeypad').style.pointerEvents = 'none';
+
+      var fb = document.getElementById('feedbackBanner');
+      fb.style.display = 'block';
+
+      if (isCorrect) {
+        correctCount++;
+        playSound('correct');
+        fb.className = 'feedback-banner correct';
+        fb.innerText = '🎉 答對了！太厲害了！';
+      } else {
+        playSound('wrong');
+        fb.className = 'feedback-banner wrong';
+        fb.innerText = '💡 再加把勁！正確答案是 ' + q.ans;
+      }
+
+      document.getElementById('btnSubmitAnswer').style.display = 'none';
+      var nextBtn = document.getElementById('btnNextQuestion');
+      nextBtn.style.display = 'flex';
+      if (currentQIndex + 1 === currentQuestions.length) {
+        nextBtn.innerHTML = '<span>結算成績 🏆</span>';
+      } else {
+        nextBtn.innerHTML = '<span>下一題 ➡️</span>';
+      }
+    }
+
+    function nextQuestion() {
+      playSound('click');
+      currentQIndex++;
+      if (currentQIndex < currentQuestions.length) {
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    // 支援實體鍵盤 Enter
+    document.getElementById('answerInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        if (!isSubmitted) submitAnswer();
+        else nextQuestion();
+      }
+    });
+
+    // ==========================================
+    // 7. 成績結算與回傳 Google Sheet
+    // ==========================================
+    function finishQuiz() {
+      playSound('fanfare');
+      var finalScore = Math.round((correctCount / currentQuestions.length) * 100);
+      var spentSeconds = Math.round((Date.now() - startTime) / 1000);
+
+      document.getElementById('finalScoreDisplay').innerText = finalScore;
+      document.getElementById('statCorrectText').innerText = correctCount + ' / ' + currentQuestions.length + ' 題';
+      document.getElementById('statTimeText').innerText = spentSeconds + ' 秒';
+
+      var medal = '🌟', title = '算術金牌大師！', subtitle = '太厲害了，滿分過關！';
+      if (finalScore < 60) {
+        medal = '🎈'; title = '潛力加油勇士！'; subtitle = '多練習幾次，一定會更加熟練！';
+      } else if (finalScore < 80) {
+        medal = '🥉'; title = '算術銅牌小將！'; subtitle = '表現良好，繼續衝刺高分！';
+      } else if (finalScore < 100) {
+        medal = '🥈'; title = '算術銀牌好手！'; subtitle = '只差一點點就滿分囉！';
+      }
+      document.getElementById('resultMedal').innerText = medal;
+      document.getElementById('resultTitle').innerText = title;
+      document.getElementById('resultSubtitle').innerText = subtitle;
+
+      showScreen('screenResult');
+
+      // 第三階段核心需求：再次呼叫 Google Apps Script API 紀錄學號、姓名、完成練習與分數
+      document.getElementById('syncStatusBox').innerHTML = '<span>⏳ 正在上傳成績至 Google Sheet...</span>';
+      postToGas({
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        action: '完成練習',
+        timestamp: new Date().toLocaleString('zh-TW'),
+        score: finalScore,
+        note: '耗時 ' + spentSeconds + ' 秒，答對 ' + correctCount + ' 題'
+      }).then(function(res) {
+        if (res && res.simulated) {
+          document.getElementById('syncStatusBox').innerHTML = '<span>☁️ 已暫存於本地紀錄（尚未設定 Google 網址）</span>';
+        } else {
+          document.getElementById('syncStatusBox').innerHTML = '<span>✅ 成績已同步上傳至 Google Sheet 試算表！</span>';
+        }
+      });
+    }
+
+    function restartSamePractice() {
+      playSound('click');
+      currentQuestions = generateMathQuestions(currentGrade, 10);
+      currentQIndex = 0;
+      correctCount = 0;
+      startTime = Date.now();
+      startQuizUI();
+    }
+
+    function backToLogin() {
+      playSound('click');
+      showScreen('screenLogin');
+    }
+
+    // ==========================================
+    // 8. 彈窗 Modal 互動
+    // ==========================================
+    function openModal(id) {
+      playSound('click');
+      if (id === 'gasModal') {
+        document.getElementById('gasApiUrlInput').value = getGasUrl();
+      } else if (id === 'historyModal') {
+        renderHistoryList();
+      }
+      var el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(id) {
+      playSound('click');
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    function saveGasUrl() {
+      var url = document.getElementById('gasApiUrlInput').value.trim();
+      setGasUrl(url);
+      alert('Google Apps Script 網址已儲存！');
+      closeModal('gasModal');
+    }
+
+    function testGasUrl() {
+      var url = document.getElementById('gasApiUrlInput').value.trim();
+      if (!url) {
+        alert('請先貼上網址！');
+        return;
+      }
+      setGasUrl(url);
+      postToGas({
+        studentId: 'TEST_001',
+        studentName: '連線測試員',
+        action: '測試連線',
+        timestamp: new Date().toLocaleString('zh-TW'),
+        score: 100
+      }).then(function() {
+        alert('測試請求已送出！請至 Google Sheet「紀錄」工作表確認是否有新增一筆測試資料。');
+      });
+    }
+
+    function copyGasScript() {
+      var code = document.getElementById('gasCodeBlock').innerText;
+      navigator.clipboard.writeText(code).then(function() {
+        alert('Google Apps Script 程式碼已複製到剪貼簿！');
+      });
+    }
+
+    function clearHistoryLogs() {
+      if (confirm('確定要清空本地歷史發送紀錄嗎？')) {
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        renderHistoryList();
+      }
+    }
+  </script>
+</body>
+</html>
